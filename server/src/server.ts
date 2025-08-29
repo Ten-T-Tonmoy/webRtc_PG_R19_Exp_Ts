@@ -19,11 +19,14 @@ app.get("/test2", (req: Request, res: Response) => {
 });
 
 import bookRoutes from "./routes/bookRoutes.js";
+import videoCallRoutes from "./routes/p2pVid.routes.js";
+
 import helmet from "helmet";
 import corsOption from "./config/cors.config.js";
 
 //------------------- route handling ----------------------------------
 app.use("/", bookRoutes);
+app.use("/p2pcall/", videoCallRoutes);
 
 httpServer.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

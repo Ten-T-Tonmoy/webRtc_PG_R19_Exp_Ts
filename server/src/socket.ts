@@ -1,9 +1,10 @@
 import { Server } from "socket.io";
 import { Request, Response } from "express";
 import { Server as HTTPServer } from "http";
+import { connecitonHandler } from "./controllers/p2pVid.controller.js";
+import { Socket } from "socket.io";
 
 // createServer() => returns Server Http
-
 export const setupSocket = (httpServer: HTTPServer) => {
   const io = new Server(httpServer, {
     cors: {
@@ -12,16 +13,7 @@ export const setupSocket = (httpServer: HTTPServer) => {
     },
   });
 
-  io.on("connection", (socket) => {
-    console.log(`Socket Connected : ${socket.id}`);
-
-    socket.on("disconnect", () => {
-      console.log(`Socket disconnected : ${socket.id}`);
-    });
-
-    socket.on("send", (msg) => {
-      console.log("got message: ", msg);
-      io.emit("receive", msg);
-    });
-  });
+  io.on("connection", (socket: Socket) => connecitonHandler(io, socket));
 };
+
+// socket controllers dont get triggered by routes
