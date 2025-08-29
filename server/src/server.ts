@@ -25,7 +25,7 @@ import helmet from "helmet";
 import corsOption from "./config/cors.config.js";
 
 //------------------- route handling ----------------------------------
-app.use("/", bookRoutes);
+
 app.use("/p2pcall/", videoCallRoutes);
 
 httpServer.listen(PORT, () => {

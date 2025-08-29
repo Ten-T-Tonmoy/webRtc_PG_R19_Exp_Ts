@@ -15,9 +15,10 @@ export const connecitonHandler = (io: Server, socket: Socket) => {
     console.log(`Socket disconnected : ${socket.id}`);
   });
 
-  socket.on("send", (msg) => {
+  socket.on("send-msg", (msg) => {
     console.log("got message: ", msg);
-    io.emit("receive", msg);
+    //io means all socket
+    socket.broadcast.emit("receive-msg", msg);
   });
 };
 
