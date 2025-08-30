@@ -4,11 +4,21 @@ import { usePeerContext } from "../../context/PeerContext";
 import Make_a_Call from "./Make_a_Call";
 import IncomingCall from "./IncomingCall";
 
+import ReactPlayer from "react-player";
+
 const InterfaceCall = () => {
   //existing user current socket will make offer:sdp
   const socket = useSocketContext();
-  const { peer, createOffer, createAnswer, setRemoteAns } = usePeerContext();
+  const {
+    peer,
+    createOffer,
+    createAnswer,
+    setRemoteAns,
+    sendStream,
+    remoteStream,
+  } = usePeerContext();
   const [targetEmail, setTargetEmail] = useState("");
+  const [myStream, setMyStream] = useState(null);
   const [callIncoming, setCallIncoming] = useState({
     coming: false,
     sender: "",
@@ -39,13 +49,20 @@ const InterfaceCall = () => {
     [createAnswer, socket]
   );
 
+  const getUserMediaStream = useCallback(async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: {
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        frameRate: { ideal: 30, max: 60 },
+      },
+    });
+    sendStream(stream);
+    setMyStream(stream);
+  }, []);
   const handleCallAccepted = useCallback(
     async (data) => {
-      setCallIncoming({
-        coming: false,
-        sender: "",
-        offer: null,
-      });
       //fk!!!!!!!!!!!!! beaware of unnecssary wrapping
       const ans = data;
       await setRemoteAns(ans);
@@ -65,16 +82,50 @@ const InterfaceCall = () => {
       //dont cleanup socket?
       //   socket.off("incoming-call", handleIncomingCall);
       //   socket.off("user-joined", handleNewUserJoining);
-      socket.off("call-accepted", handleCallAccepted);
+      //   socket.off("call-accepted", handleCallAccepted);
     };
   }, [handleNewUserJoining, socket, handleIncomingCall]);
 
+  useEffect(() => {
+    getUserMediaStream();
+  }, [getUserMediaStream]);
   return (
     <>
       <h1 className="text-center">InterfaceCall</h1>
       <div className="h-screen relative w-full flex flex-col items-center justify-center">
-        {callIncoming.coming && <IncomingCall callIncoming={callIncoming} />}
+        {callIncoming.coming && (
+          <IncomingCall
+            callIncoming={callIncoming}
+            setCallIncoming={setCallIncoming}
+          />
+        )}
+
         <Make_a_Call targetEmail={targetEmail} />
+        <div className="relative">
+          <video
+            ref={(video) => {
+              if (video && remoteStream) {
+                video.srcObject = remoteStream;
+              }
+            }}
+            autoPlay
+            className="w-[80vw] h-[50vh] object-cover rounded-md bg-black"
+            style={{ transform: "scaleX(-1)" }}
+          />
+          {myStream && (
+            <video
+              ref={(video) => {
+                if (video && myStream) {
+                  video.srcObject = myStream;
+                }
+              }}
+              autoPlay
+              className="object-cover absolute bottom-0 right-0
+            w-30 h-30 rounded-md bg-gray-800"
+              style={{ transform: "scaleX(-1)" }}
+            />
+          )}
+        </div>
       </div>
     </>
   );

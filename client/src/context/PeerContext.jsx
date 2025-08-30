@@ -4,6 +4,7 @@ import React, {
   useMemo,
   useState,
   useCallback,
+  useEffect,
 } from "react";
 
 const PeerContext = createContext(null);
@@ -11,6 +12,8 @@ const PeerContext = createContext(null);
 export const usePeerContext = () => useContext(PeerContext);
 
 export const PeerContextProvider = ({ children }) => {
+  const [remoteStream, setRemoteStream] = useState(null);
+
   const peer = useMemo(() => {
     const config = {
       iceServers: [
@@ -20,6 +23,14 @@ export const PeerContextProvider = ({ children }) => {
     };
     return new RTCPeerConnection(config);
   }, []);
+
+  const sendStream = async (stream) => {
+    const tracks = stream.getTracks();
+    for (const track of tracks) {
+      peer.addTrack(track, stream);
+      //adding to rtc
+    }
+  };
 
   const createOffer = useCallback(async () => {
     try {
@@ -68,9 +79,29 @@ export const PeerContextProvider = ({ children }) => {
     },
     [peer]
   );
+
+  const handleGetTrack = useCallback((ev) => {
+    const streams = ev.streams;
+    setRemoteStream(streams[0]);
+  });
+
+  useEffect(() => {
+    peer.addEventListener("track", handleGetTrack);
+
+    return () => {
+      peer.removeEventListener("track", handleGetTrack);
+    };
+  }, []);
   return (
     <PeerContext.Provider
-      value={{ peer, createOffer, createAnswer, setRemoteAns }}
+      value={{
+        peer,
+        createOffer, //to format
+        createAnswer,
+        setRemoteAns,
+        remoteStream,
+        sendStream,
+      }}
     >
       {/* wrapper */}
       {children}

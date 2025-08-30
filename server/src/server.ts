@@ -28,6 +28,6 @@ import corsOption from "./config/cors.config.js";
 
 app.use("/p2pcall/", videoCallRoutes);
 
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

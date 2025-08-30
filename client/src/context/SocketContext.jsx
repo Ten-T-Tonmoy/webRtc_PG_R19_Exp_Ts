@@ -4,7 +4,7 @@ import io from "socket.io-client";
 const SocketContext = createContext(null);
 
 export const SocketContextProvider = ({ children }) => {
-  const FE_URL = "http://localhost:3000/";
+  const FE_URL = "http://192.168.1.104:3000/";
   const socket = useMemo(() => io(FE_URL), []); //keep it always memorized
   if (!socket) throw new Error("Socket not initialized");
 

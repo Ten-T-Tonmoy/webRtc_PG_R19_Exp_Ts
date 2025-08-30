@@ -3,6 +3,7 @@ import { CorsOptions } from "cors";
 const allowedOriginsCors = [
   "http://after-upload-done.vercel.app", //use env
   "http://localhost:5173",
+  "http://192.168.1.104:5173/",
 ];
 
 const corsOption: CorsOptions = {

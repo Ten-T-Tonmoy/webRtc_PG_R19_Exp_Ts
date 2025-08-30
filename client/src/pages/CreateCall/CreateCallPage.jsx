@@ -64,7 +64,12 @@ const CreateCallPage = () => {
             onChange={(e) => setRoom(e.target.value)}
           />
           <br />
-          <button className="rounded-full  btn btn-primary">Join</button>
+          <button
+            onClick={handleSubmitForm}
+            className="rounded-full  btn btn-primary"
+          >
+            Join
+          </button>
         </form>
       </div>
     </div>

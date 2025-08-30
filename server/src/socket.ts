@@ -8,7 +8,10 @@ import { Socket } from "socket.io";
 export const setupSocket = (httpServer: HTTPServer) => {
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL || "http://localhost:5173",
+      origin: [
+        process.env.FRONTEND_URL || "http://localhost:5173",
+        "http://192.168.1.104:5173",
+      ],
       methods: ["GET", "POST"],
     },
   });

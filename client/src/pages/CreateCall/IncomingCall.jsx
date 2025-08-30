@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useSocketContext } from "../../context/SocketContext";
 import { usePeerContext } from "../../context/PeerContext";
 
-const IncomingCall = ({ callIncoming }) => {
+const IncomingCall = ({ callIncoming, setCallIncoming }) => {
   const socket = useSocketContext();
   const { createAnswer } = usePeerContext();
 
@@ -15,14 +15,19 @@ const IncomingCall = ({ callIncoming }) => {
     );
     const ans = await createAnswer(callIncoming.offer);
     socket.emit("call-accepted", { callerEmail: callIncoming.sender, ans });
+    setCallIncoming({
+      coming: false,
+      sender: "",
+      offer: null,
+    });
   };
   return (
     <div
-      className="fixed top-0 left-0 w-screen h-screen
+      className="fixed top-0 z-10 left-0 w-screen h-screen
     bg-black/70 flex justify-center items-center"
     >
       <div
-        className="bg-primary p-10 w-1/2 rounded-3xl
+        className="bg-primary p-10 md:w-1/2 w-[80vw] rounded-3xl
        flex flex-col items-center justify-center"
       >
         <div className="flex flex-col justify-center">
