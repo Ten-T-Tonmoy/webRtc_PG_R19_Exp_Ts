@@ -20,6 +20,10 @@ export const connecitonHandler = (io: Server, socket: Socket) => {
     const { email, room } = data;
     emailToSocketMap.set(email, socket.id);
     socketIdToEmailMap.set(socket.id, email);
+    console.log(
+      "Current room members:",
+      Array.from(emailToSocketMap.entries())
+    );
 
     socket.join(room);
     //msg to room on user-joined
@@ -28,6 +32,7 @@ export const connecitonHandler = (io: Server, socket: Socket) => {
     io.to(socket.id).emit("room-join", {
       ...data,
       success: "Joined successfully",
+      participants: emailToSocketMap.entries(),
     });
     //checks for sucess
   });
@@ -53,8 +58,24 @@ export const connecitonHandler = (io: Server, socket: Socket) => {
     io.to(socketId).emit("incoming-call", { from: senderEmail, offer });
   });
 
+  //emit korbe 2nd user
+  socket.on("call-accepted", (data) => {
+    const { callerEmail, ans } = data;
+    const socketId = emailToSocketMap.get(callerEmail);
+    socket.to(socketId).emit("call-accepted", ans);
+    //dont forward from frontend just listen
+  });
+
+  //--------------------on disconnect--------------------
   socket.on("disconnect", () => {
     console.log(`Socket disconnected : ${socket.id}`);
+
+    const email = socketIdToEmailMap.get(socket.id);
+    if (email) {
+      emailToSocketMap.delete(email);
+      socketIdToEmailMap.delete(socket.id);
+      //   console.log(`Cleaned up socket <-> email mapping for ${email}`);
+    }
   });
 };
 

@@ -25,7 +25,7 @@ const CreateCallPage = () => {
 
   const handleJoinRoom = useCallback(
     (data) => {
-      const { email, room, success } = data;
+      const { email, room, success, participants } = data;
       navigate(`/call/${room}`);
       console.log(success);
     },
