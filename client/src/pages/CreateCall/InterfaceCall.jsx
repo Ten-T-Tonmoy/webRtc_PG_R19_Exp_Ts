@@ -10,9 +10,8 @@ const InterfaceCall = () => {
   //existing user current socket will make offer:sdp
   const socket = useSocketContext();
   const {
-    peer,
     createOffer,
-    createAnswer,
+    createAnswer, //
     setRemoteAns,
     sendStream,
     remoteStream,
@@ -50,16 +49,43 @@ const InterfaceCall = () => {
   );
 
   const getUserMediaStream = useCallback(async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: {
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        frameRate: { ideal: 30, max: 60 },
-      },
-    });
-    sendStream(stream);
-    setMyStream(stream);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: {
+          facingMode: "user",
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30, max: 60 },
+        },
+      });
+
+      setMyStream(stream);
+      //----------addding instant filters---------------
+      const videoHidden = document.createElement("video");
+      videoHidden.srcObject = stream;
+
+      videoHidden.play();
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = 1280;
+      canvas.height = 720;
+
+      const draw = () => {
+        if (!ctx) return;
+        ctx.filter = "grayscale(100%) blur(2px)"; // <-- filter applied
+        ctx.drawImage(videoHidden, 0, 0, canvas.width, canvas.height);
+        requestAnimationFrame(draw);
+      };
+      draw();
+
+      const filteredStream = canvas.captureStream(30);
+
+      sendStream(filteredStream);
+    } catch (err) {
+      console.error("getUserMedia failed:", err);
+    }
   }, []);
   const handleCallAccepted = useCallback(
     async (data) => {
@@ -109,7 +135,7 @@ const InterfaceCall = () => {
               }
             }}
             autoPlay
-            className="w-[80vw] h-[50vh] object-cover rounded-md bg-black"
+            className="w-[85vw] h-[70vh] object-cover rounded-md bg-black"
             style={{ transform: "scaleX(-1)" }}
           />
           {myStream && (
@@ -120,7 +146,7 @@ const InterfaceCall = () => {
                 }
               }}
               autoPlay
-              className="object-cover absolute bottom-0 right-0
+              className="object-cover absolute bottom-1 right-1
             w-30 h-30 rounded-md bg-gray-800"
               style={{ transform: "scaleX(-1)" }}
             />
